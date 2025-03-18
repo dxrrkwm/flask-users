@@ -1,0 +1,87 @@
+[tool.poetry]
+name = "flask-users"
+version = "0.1.0"
+description = ""
+authors = ["Vadym Sulim <ohnooq1@gmail.com>"]
+readme = "README.md"
+package-mode = false
+
+[tool.poetry.dependencies]
+python = "^3.12"
+flask = "^3.0.2"
+sqlalchemy = "^2.0.29"
+flask-sqlalchemy = "^3.1.0"
+marshmallow = "^3.21.2"
+flask-marshmallow = "^1.1.0"
+marshmallow-sqlalchemy = "^0.30.0"
+flask-swagger-ui = "^4.11.1"
+python-dotenv = "^1.0.1"
+flask-migrate = "^4.0.5"
+
+[tool.poetry.group.dev.dependencies]
+ruff = "^0.8.4"
+isort = "^5.13.2"
+coverage = "^7.6.10"
+pytest = "^8.1.0"
+pytest-flask = "^1.3.0"
+
+[tool.ruff]
+line-length = 120
+exclude = [
+    "migrations",
+    "node_modules",
+    "static",
+    "templates",
+    "venv",
+    "env",
+    ".git",
+    ".idea",
+    ".venv",
+    ".dockerignore",
+    ".env",
+    ".gitignore",
+    ".classpath",
+    ".DS_Store",
+    "*.dbmdl",
+    "*.user",
+    "*.dockerignore",
+    "*.env",
+    "*.git",
+    "*.gitignore",
+    "*.project",
+    "*.settings",
+    "*.toolstarget",
+    "*.classpath",
+    "*.DS_Store",
+]
+
+[tool.ruff.lint]
+select = [
+    "E",  # PEP8 errors
+    "W",  # PEP8 warnings
+    "F",  # PyFlakes
+    "I",  # isort
+    "B",  # bugbear
+    "C4",  # mypy
+    "N",  # flake8-bugbear
+    "Q",  # flake8-quotes
+]
+ignore = [
+    "C901",  # function too complex
+    "W191",  # indentation contains tabs
+    "D401",  # first line should be in imperative mood
+    "I001"   # isort
+
+]
+
+[tool.isort]
+multi_line_output = 3
+line_length = 88
+include_trailing_comma = true
+force_grid_wrap = 0
+combine_as_imports = true
+lines_after_imports = 2
+
+[build-system]
+requires = ["poetry-core"]
+build-backend = "poetry.core.masonry.api"
