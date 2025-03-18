@@ -1,4 +1,5 @@
 import pytest
+
 from app import create_app
 from app.extensions import db as _db
 
@@ -9,12 +10,12 @@ def app():
     app.config.update({
         "TESTING": True,
     })
-    
+
     with app.app_context():
         _db.create_all()
-        
+
     yield app
-    
+
     with app.app_context():
         _db.session.remove()
         _db.drop_all()
@@ -28,4 +29,4 @@ def client(app):
 @pytest.fixture
 def db(app):
     with app.app_context():
-        yield _db 
+        yield _db

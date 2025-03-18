@@ -28,16 +28,16 @@ def get_user(user_id):
 def create_user():
     try:
         user = user_schema.load(request.json)
-        
+
         if User.query.filter_by(email=user.email).first():
             return jsonify({"message": "Email already registered"}), 409
-        
+
         db.session.add(user)
         db.session.commit()
-        
+
         result = user_schema.dump(user)
         return jsonify(result), 201
-    
+
     except Exception as e:
         db.session.rollback()
         return jsonify({"message": str(e)}), 400
@@ -47,23 +47,23 @@ def create_user():
 def update_user(user_id):
     try:
         user = User.query.get_or_404(user_id)
-        
+
         data = request.json
-        
+
         if "email" in data and data["email"] != user.email:
             if User.query.filter_by(email=data["email"]).first():
                 return jsonify({"message": "Email already registered"}), 409
-        
+
         if "name" in data:
             user.name = data["name"]
         if "email" in data:
             user.email = data["email"]
-        
+
         db.session.commit()
-        
+
         result = user_schema.dump(user)
         return jsonify(result), 200
-    
+
     except Exception as e:
         db.session.rollback()
         return jsonify({"message": str(e)}), 400
@@ -73,12 +73,12 @@ def update_user(user_id):
 def delete_user(user_id):
     try:
         user = User.query.get_or_404(user_id)
-        
+
         db.session.delete(user)
         db.session.commit()
-        
+
         return jsonify({"message": "User deleted successfully"}), 200
-    
+
     except Exception as e:
         db.session.rollback()
-        return jsonify({"message": str(e)}), 400 
+        return jsonify({"message": str(e)}), 400

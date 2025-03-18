@@ -1,4 +1,5 @@
 import os
+
 from app import create_app
 from app.extensions import db
 
@@ -24,4 +25,4 @@ def init_db():
 
 if __name__ == "__main__":
     print("Starting app")
-    app.run(host="0.0.0.0", port=5000, debug=False) 
+    app.run(host="0.0.0.0", port=5000, debug=False)

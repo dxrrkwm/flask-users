@@ -13,13 +13,13 @@ def init_extensions(app):
         "pool_pre_ping": True,
         "pool_recycle": 300,
     }
-    
+
     app.config["SQLALCHEMY_ENGINE_OPTIONS"] = engine_options
-    
+
     db.init_app(app)
     ma.init_app(app)
     migrate.init_app(app, db)
-    
+
     with app.app_context():
         try:
             db.engine.connect()
