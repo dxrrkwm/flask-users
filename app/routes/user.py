@@ -1,4 +1,6 @@
 from flask import Blueprint, jsonify, request, Response
+from sqlalchemy import select
+from sqlalchemy.exc import SQLAlchemyError
 
 from app.extensions import db
 from app.models import User
@@ -12,14 +14,20 @@ users_schema = UserSchema(many=True)
 
 @user_bp.route("", methods=["GET"])
 def get_users() -> tuple[Response, int]:
-    users: list[User] = User.query.all()
+    stmt = select(User)
+    users: list[User] = db.session.execute(stmt).scalars().all()
     result: list[dict] = users_schema.dump(users)
     return jsonify(result), 200
 
 
 @user_bp.route("/<int:user_id>", methods=["GET"])
 def get_user(user_id: int) -> tuple[Response, int]:
-    user: User = User.query.get_or_404(user_id)
+    stmt = select(User).where(User.id == user_id)
+    user: User | None = db.session.execute(stmt).scalar_one_or_none()
+    
+    if not user:
+        return jsonify({"message": "User not found"}), 404
+        
     result: dict = user_schema.dump(user)
     return jsonify(result), 200
 
@@ -29,7 +37,8 @@ def create_user() -> tuple[Response, int]:
     try:
         user: User = user_schema.load(request.json)
 
-        existing_user: User | None = User.query.filter_by(email=user.email).first()
+        stmt = select(User).where(User.email == user.email)
+        existing_user: User | None = db.session.execute(stmt).scalar_one_or_none()
         if existing_user:
             return jsonify({"message": "Email already registered"}), 409
 
@@ -39,6 +48,9 @@ def create_user() -> tuple[Response, int]:
         result: dict = user_schema.dump(user)
         return jsonify(result), 201
 
+    except SQLAlchemyError as e:
+        db.session.rollback()
+        return jsonify({"message": str(e)}), 400
     except Exception as e:
         db.session.rollback()
         return jsonify({"message": str(e)}), 400
@@ -47,12 +59,17 @@ def create_user() -> tuple[Response, int]:
 @user_bp.route("/<int:user_id>", methods=["PUT"])
 def update_user(user_id: int) -> tuple[Response, int]:
     try:
-        user: User = User.query.get_or_404(user_id)
+        stmt = select(User).where(User.id == user_id)
+        user: User | None = db.session.execute(stmt).scalar_one_or_none()
+        
+        if not user:
+            return jsonify({"message": "User not found"}), 404
 
         data: dict = request.json
 
         if "email" in data and data["email"] != user.email:
-            existing_user: User | None = User.query.filter_by(email=data["email"]).first()
+            stmt = select(User).where(User.email == data["email"])
+            existing_user: User | None = db.session.execute(stmt).scalar_one_or_none()
             if existing_user:
                 return jsonify({"message": "Email already registered"}), 409
 
@@ -66,6 +83,9 @@ def update_user(user_id: int) -> tuple[Response, int]:
         result: dict = user_schema.dump(user)
         return jsonify(result), 200
 
+    except SQLAlchemyError as e:
+        db.session.rollback()
+        return jsonify({"message": str(e)}), 400
     except Exception as e:
         db.session.rollback()
         return jsonify({"message": str(e)}), 400
@@ -74,13 +94,20 @@ def update_user(user_id: int) -> tuple[Response, int]:
 @user_bp.route("/<int:user_id>", methods=["DELETE"])
 def delete_user(user_id: int) -> tuple[Response, int]:
     try:
-        user: User = User.query.get_or_404(user_id)
+        stmt = select(User).where(User.id == user_id)
+        user: User | None = db.session.execute(stmt).scalar_one_or_none()
+        
+        if not user:
+            return jsonify({"message": "User not found"}), 404
 
         db.session.delete(user)
         db.session.commit()
 
         return jsonify({"message": "User deleted successfully"}), 200
 
+    except SQLAlchemyError as e:
+        db.session.rollback()
+        return jsonify({"message": str(e)}), 400
     except Exception as e:
         db.session.rollback()
         return jsonify({"message": str(e)}), 400
