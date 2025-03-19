@@ -1,3 +1,4 @@
+from flask import Flask
 from flask_marshmallow import Marshmallow
 from flask_migrate import Migrate
 from flask_sqlalchemy import SQLAlchemy
@@ -8,18 +9,18 @@ ma = Marshmallow()
 migrate = Migrate()
 
 
-def init_extensions(app):
+def init_extensions(app: Flask) -> None:
     engine_options = {
         "pool_pre_ping": True,
         "pool_recycle": 300,
     }
-    
+
     app.config["SQLALCHEMY_ENGINE_OPTIONS"] = engine_options
-    
+
     db.init_app(app)
     ma.init_app(app)
     migrate.init_app(app, db)
-    
+
     with app.app_context():
         try:
             db.engine.connect()

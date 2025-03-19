@@ -1,9 +1,12 @@
 import os
+
+from flask import Flask
+
 from app import create_app
 from app.extensions import db
 
 
-app = create_app()
+app: Flask = create_app()
 
 
 with app.app_context():
@@ -17,11 +20,11 @@ with app.app_context():
 
 
 @app.cli.command("init-db")
-def init_db():
+def init_db() -> None:
     db.create_all()
     print("Database created")
 
 
 if __name__ == "__main__":
     print("Starting app")
-    app.run(host="0.0.0.0", port=5000, debug=False) 
+    app.run(host="0.0.0.0", port=5000, debug=False)

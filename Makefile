@@ -6,7 +6,7 @@ DOCKER_COMPOSE = docker-compose
 
 .PHONY: help
 help:
-	@echo "Usage: make [target]"
+	@echo "Usage: make [target] [path=<path>]"
 	@echo ""
 	@echo "Targets:"
 	@echo "  deps         Install dependencies with Poetry"
@@ -14,7 +14,7 @@ help:
 	@echo "  down         Stop the application"
 	@echo "  init-db-docker      Initialize database in docker"
 	@echo "  test         Run tests"
-	@echo "  lint         Run Ruff"
+	@echo "  lint      		Run isort and Ruff on a specific path"
 	@echo "  clean        Remove cache files"
 	@echo "  build        Build the application"
 	@echo "  up-build     Start the application with build"
@@ -54,7 +54,9 @@ test-docker:
 
 .PHONY: lint
 lint:
-	${POETRY} run ruff check --fix
+	@echo "Running isort and Ruff on: $(path)"
+	${POETRY} run isort $(path)
+	${POETRY} run ruff check --fix $(path)
 
 .PHONY: clean
 clean:

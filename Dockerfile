@@ -12,14 +12,12 @@ COPY pyproject.toml poetry.lock* ./
 
 RUN poetry config virtualenvs.create false
 
-RUN poetry install
+RUN poetry install --no-interaction --no-ansi
 
 COPY . .
 
 RUN mkdir -p instance && chown -R root:root instance
 
-ENV FLASK_APP=app.py
-ENV FLASK_CONFIG=production
 ENV PYTHONPATH=/app
 
 EXPOSE 5000
