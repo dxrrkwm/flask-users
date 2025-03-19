@@ -1,4 +1,4 @@
-from flask import Blueprint, jsonify, request
+from flask import Blueprint, jsonify, request, Response
 
 from app.extensions import db
 from app.models import User
@@ -11,31 +11,32 @@ users_schema = UserSchema(many=True)
 
 
 @user_bp.route("", methods=["GET"])
-def get_users():
-    users = User.query.all()
-    result = users_schema.dump(users)
+def get_users() -> tuple[Response, int]:
+    users: list[User] = User.query.all()
+    result: list[dict] = users_schema.dump(users)
     return jsonify(result), 200
 
 
 @user_bp.route("/<int:user_id>", methods=["GET"])
-def get_user(user_id):
-    user = User.query.get_or_404(user_id)
-    result = user_schema.dump(user)
+def get_user(user_id: int) -> tuple[Response, int]:
+    user: User = User.query.get_or_404(user_id)
+    result: dict = user_schema.dump(user)
     return jsonify(result), 200
 
 
 @user_bp.route("", methods=["POST"])
-def create_user():
+def create_user() -> tuple[Response, int]:
     try:
-        user = user_schema.load(request.json)
+        user: User = user_schema.load(request.json)
 
-        if User.query.filter_by(email=user.email).first():
+        existing_user: User | None = User.query.filter_by(email=user.email).first()
+        if existing_user:
             return jsonify({"message": "Email already registered"}), 409
 
         db.session.add(user)
         db.session.commit()
 
-        result = user_schema.dump(user)
+        result: dict = user_schema.dump(user)
         return jsonify(result), 201
 
     except Exception as e:
@@ -44,14 +45,15 @@ def create_user():
 
 
 @user_bp.route("/<int:user_id>", methods=["PUT"])
-def update_user(user_id):
+def update_user(user_id: int) -> tuple[Response, int]:
     try:
-        user = User.query.get_or_404(user_id)
+        user: User = User.query.get_or_404(user_id)
 
-        data = request.json
+        data: dict = request.json
 
         if "email" in data and data["email"] != user.email:
-            if User.query.filter_by(email=data["email"]).first():
+            existing_user: User | None = User.query.filter_by(email=data["email"]).first()
+            if existing_user:
                 return jsonify({"message": "Email already registered"}), 409
 
         if "name" in data:
@@ -61,7 +63,7 @@ def update_user(user_id):
 
         db.session.commit()
 
-        result = user_schema.dump(user)
+        result: dict = user_schema.dump(user)
         return jsonify(result), 200
 
     except Exception as e:
@@ -70,9 +72,9 @@ def update_user(user_id):
 
 
 @user_bp.route("/<int:user_id>", methods=["DELETE"])
-def delete_user(user_id):
+def delete_user(user_id: int) -> tuple[Response, int]:
     try:
-        user = User.query.get_or_404(user_id)
+        user: User = User.query.get_or_404(user_id)
 
         db.session.delete(user)
         db.session.commit()
